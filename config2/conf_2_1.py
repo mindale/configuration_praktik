@@ -50,28 +50,34 @@ def get_git_commits(repo_path, before_date):
 
 
 
+
+
 def build_plantuml_code(commits):
     """
-    Строит текстовое представление графа зависимостей в формате PlantUML.
+    Генерирует PlantUML-код для графа зависимостей коммитов.
     """
     plantuml_lines = ["@startuml", "skinparam linetype ortho"]
+    added_nodes = set()  # Множество для отслеживания уже добавленных узлов
 
     for line in commits:
         parts = line.split()
         commit = parts[0]
         parents = parts[1:]
 
-        # Добавляем узлы и зависимости
-        plantuml_lines.append(f'node "{commit}" as {commit}')
+        # Добавляем узел, если он еще не был добавлен
+        if commit not in added_nodes:
+            plantuml_lines.append(f'node "{commit}" as {commit}')
+            added_nodes.add(commit)
+
+        # Добавляем родительские узлы и связи
         for parent in parents:
+            if parent not in added_nodes:
+                plantuml_lines.append(f'node "{parent}" as {parent}')
+                added_nodes.add(parent)
             plantuml_lines.append(f'{parent} --> {commit}')
 
     plantuml_lines.append("@enduml")
     return "\n".join(plantuml_lines)
-
-
-
-
 
 
 def save_to_file(output_file, content):
@@ -97,6 +103,7 @@ def main(config_path):
 
     print("Получение коммитов из Git...")
     commits = get_git_commits(repo_path, before_date)
+    commits = list(set(commits))  # Удаление дубликатов из списка
     if not commits:
         print("Нет коммитов до указанной даты.")
         return
