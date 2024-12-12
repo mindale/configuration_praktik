@@ -71,32 +71,7 @@ def build_plantuml_code(commits):
 
 
 
-# def build_plantuml_code(commits):
-#     """
-#     Генерирует PlantUML-код для графа зависимостей коммитов.
-#     """
-#     plantuml_lines = ["@startuml", "skinparam linetype ortho"]
-#     added_nodes = set()  # Множество для отслеживания уже добавленных узлов
-#
-#     for line in commits:
-#         parts = line.split()
-#         commit = parts[0]
-#         parents = parts[1:]
-#
-#         # Добавляем узел, если он еще не был добавлен
-#         if commit not in added_nodes:
-#             plantuml_lines.append(f'node "{commit}" as {commit}')
-#             added_nodes.add(commit)
-#
-#         # Добавляем родительские узлы и связи
-#         for parent in parents:
-#             if parent not in added_nodes:
-#                 plantuml_lines.append(f'node "{parent}" as {parent}')
-#                 added_nodes.add(parent)
-#             plantuml_lines.append(f'{parent} --> {commit}')
-#
-#     plantuml_lines.append("@enduml")
-#     return "\n".join(plantuml_lines)
+
 
 
 def save_to_file(output_file, content):
