@@ -16,8 +16,12 @@ class VirtualShell:
 
         # Создаем временную директорию для распаковки
         self.temp_dir = tempfile.mkdtemp()
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(self.temp_dir)
+        try:
+            # Используем контекстный менеджер для закрытия файла ZIP
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(self.temp_dir)
+        except Exception as e:
+            raise RuntimeError(f"Ошибка при распаковке ZIP-файла: {e}")
 
         # Устанавливаем рабочую директорию
         os.chdir(self.temp_dir)
@@ -41,7 +45,13 @@ class VirtualShell:
         return f"Пользователь: {getpass.getuser()}"
 
     def cleanup(self):
-        shutil.rmtree(self.temp_dir)
+        """Удаление временной директории после использования."""
+        try:
+            os.chdir("/")  # Возвращаемся в безопасную директорию
+            if os.path.exists(self.temp_dir):
+                shutil.rmtree(self.temp_dir)
+        except Exception as e:
+            print(f"Ошибка при очистке временной директории: {e}")
 
 # GUI для оболочки
 class ShellGUI:
@@ -125,12 +135,9 @@ class ShellGUI:
     def cleanup_and_exit(self):
         if self.virtual_shell:
             self.virtual_shell.cleanup()
-        else:
-            exit(0)
         self.root.quit()
 
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = ShellGUI(root)
-    root.mainloop()
+root = tk.Tk()
+app = ShellGUI(root)
+root.mainloop()
